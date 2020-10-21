@@ -87,7 +87,7 @@ func main() {
 
 	buf := make([]string, 0, *num)
 
-	files := make([]*os.File, 10)
+	files := make([]*os.File, 0, 10)
 
 	// read input in bunches, sort, and write each bunch to a temporary file
 	scanner := bufio.NewScanner(os.Stdin)
