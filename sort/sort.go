@@ -18,6 +18,22 @@ type Input struct {
 	scanner *bufio.Scanner
 }
 
+// read next line of input
+// return true if the line is read
+func (input *Input) next() bool {
+	scan := input.scanner
+	if scan.Scan() {
+		input.line = scan.Text()
+	} else {
+		if err := scan.Err(); err != nil {
+			log.Fatal(err)
+		}
+		return false // end of file
+	}
+	return true
+}
+
+// heap storage
 type InputHeap []Input
 
 // heap implementation
@@ -47,12 +63,12 @@ func write(lines []string) (file *os.File) {
 
 	// write data
 	for _, line := range lines {
-		if _, err = fmt.Fprintln(file, line); err != nil {
+		if _, err = fmt.Fprintln(w, line); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	// flush data to disk to free up the buffer
+	// flush data to disk
 	if err = w.Flush(); err != nil {
 		log.Fatal(err)
 	}
@@ -63,21 +79,6 @@ func write(lines []string) (file *os.File) {
 	}
 
 	return
-}
-
-// read next line of input
-// return true if the line is read
-func (input *Input) next() bool {
-	scan := input.scanner
-	if scan.Scan() {
-		input.line = scan.Text()
-	} else {
-		if err := scan.Err(); err != nil {
-			log.Fatal(err)
-		}
-		return false // end of file
-	}
-	return true
 }
 
 func main() {
