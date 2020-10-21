@@ -1,5 +1,5 @@
 # extsort
-Basic external sort implementation on golang (based on container/heap).
+Basic external sort implementation on golang (based on `container/heap`).
 
 `generator` - a tool to generate random strings for sort input.
 
@@ -18,6 +18,7 @@ Every bunch uses one file descriptor. Specify larger bunch size for huge inputs
 to avoid "too many open files" error (default is 5000 lines per bunch).
 
 Usage:
+
     cd generator
     go build
     cd ../sort
