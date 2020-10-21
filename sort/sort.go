@@ -82,7 +82,7 @@ func write(lines []string) (file *os.File) {
 }
 
 func main() {
-	num := flag.Int("n", 1000, "Number of strings to read in one bunch")
+	num := flag.Int("n", 5000, "Number of strings to read in one bunch")
 	flag.Parse()
 
 	buf := make([]string, 0, *num)
