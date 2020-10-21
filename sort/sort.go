@@ -20,14 +20,13 @@ type Input struct {
 
 type InputHeap []Input
 
+// heap implementation
 func (h InputHeap) Len() int           { return len(h) }
 func (h InputHeap) Less(i, j int) bool { return h[i].line < h[j].line }
 func (h InputHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-
 func (h *InputHeap) Push(x interface{}) {
 	*h = append(*h, x.(Input))
 }
-
 func (h *InputHeap) Pop() interface{} {
 	old := *h
 	n := len(old)
@@ -36,7 +35,9 @@ func (h *InputHeap) Pop() interface{} {
 	return x
 }
 
-func writeBunch(lines []string) (file *os.File) {
+// write buf to temp file
+// rewind the file afterwards, to read from the beginning
+func write(lines []string) (file *os.File) {
 	file, err := ioutil.TempFile("", "sort")
 	if err != nil {
 		log.Fatal(err)
@@ -93,13 +94,18 @@ func main() {
 		buf = append(buf, scanner.Text())
 		if len(buf) == cap(buf) {
 			sort.Strings(buf)
-			file := writeBunch(buf)
-			files = append(files, file)
+			files = append(files, write(buf))
 			buf = buf[:0]
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
+	}
+
+	// write remaining lines
+	if len(buf) > 0 {
+		sort.Strings(buf)
+		files = append(files, write(buf))
 	}
 
 	// read first lines of each bunch into a heap, and sort it
@@ -113,7 +119,8 @@ func main() {
 	}
 	heap.Init(&h)
 
-	// read lines from the heap, replacing with the next one from the same bunch
+	// read line from the heap, replacing with the next one from the same bunch
+	// repeat until all inputs are exausted
 	for h.Len() > 0 {
 		fmt.Println(h[0].line)
 		if h[0].next() {
