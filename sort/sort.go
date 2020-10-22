@@ -51,6 +51,16 @@ func (h *InputHeap) Pop() interface{} {
 	return x
 }
 
+// close and delete temporary file
+func cleanup(f *os.File) {
+	if err := f.Close(); err != nil {
+		log.Println(err)
+	}
+	if err := os.Remove(f.Name()); err != nil {
+		log.Println(err)
+	}
+}
+
 // write buf to temp file
 // rewind the file afterwards, to read from the beginning
 func write(lines []string) (file *os.File) {
@@ -64,17 +74,20 @@ func write(lines []string) (file *os.File) {
 	// write data
 	for _, line := range lines {
 		if _, err = fmt.Fprintln(w, line); err != nil {
+			cleanup(file)
 			log.Fatal(err)
 		}
 	}
 
 	// flush data to disk
 	if err = w.Flush(); err != nil {
+		cleanup(file)
 		log.Fatal(err)
 	}
 
 	// rewind to the beginning of the file
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		cleanup(file)
 		log.Fatal(err)
 	}
 
@@ -88,6 +101,13 @@ func main() {
 	buf := make([]string, 0, *num)
 
 	files := make([]*os.File, 0, 10)
+
+	// defer temp files cleanup
+	defer func(pf *[]*os.File) {
+		for _, file := range *pf {
+			cleanup(file)
+		}
+	}(&files)
 
 	// read input in bunches, sort, and write each bunch to a temporary file
 	scanner := bufio.NewScanner(os.Stdin)
@@ -130,16 +150,6 @@ func main() {
 		} else {
 			// no more lines in this input bunch
 			heap.Pop(&h)
-		}
-	}
-
-	// clean up temp files
-	for _, file := range files {
-		if err := file.Close(); err != nil {
-			log.Println(err)
-		}
-		if err := os.Remove(file.Name()); err != nil {
-			log.Println(err)
 		}
 	}
 }
